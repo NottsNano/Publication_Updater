@@ -37,7 +37,7 @@ for pub in tqdm(pubs):
     if "pub_year" not in pub["bib"]:
         continue
     year = int(pub["bib"]["pub_year"])
-    if year < MIN_YEAR:
+    if year <= MIN_YEAR:
         continue
     else:
         # Fill in details into year based dict
@@ -55,7 +55,7 @@ for pub in tqdm(pubs):
                                    "title": pub["bib"]["title"],
                                    "authors": authors,
                                    "journal": pub["bib"]["journal"],
-                                   "volume": pub["bib"]["title"],
+                                   "volume": pub["bib"]["volume"],
                                    "number": pub["bib"]["number"],
                                    "pages": pub["bib"]["pages"],
                                    "url": pub["pub_url"]})
