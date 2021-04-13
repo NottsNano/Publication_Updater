@@ -1,4 +1,6 @@
+import functools
 import io
+import operator
 from collections import defaultdict
 
 from scholarly import scholarly, ProxyGenerator
@@ -19,46 +21,46 @@ scholarly.use_proxy(pg.FreeProxies())
 
 # Preallocate
 pubs_by_year = defaultdict(list)
+pubs = []
 
-# For every person
+# Get all publications in an unordered list
 for p in PEOPLE:
     search_query = scholarly.search_author(f'{p}, Nottingham')
     author = next(search_query)
     info = scholarly.fill(author, sections=['publications'])
-    pubs = info["publications"]
+    pubs.append(info["publications"])
+pubs = functools.reduce(operator.iconcat, pubs, [])
 
-    # For every publication
-    for pub in tqdm(pubs):
+# For every publication
+for pub in tqdm(pubs):
+    # Skip if year is outside search range (or not available)
+    if "pub_year" not in pub["bib"]:
+        continue
+    year = int(pub["bib"]["pub_year"])
+    if year < MIN_YEAR:
+        continue
+    else:
+        # Fill in details into year based dict
+        pub = scholarly.fill(pub, sections=["bib", "pub_url"])
 
-        # If year not available, skip to save time
-        if "pub_year" not in pub["bib"]:
-            continue
+        authors = pub["bib"]["author"]
+        authors = authors.replace(" and", ",", (authors.count(" and") - 1))
 
-        year = int(pub["bib"]["pub_year"])
-        if year < MIN_YEAR:
-            continue
-        else:
-            # Fill in details by year
-            pub = scholarly.fill(pub, sections=["bib", "pub_url"])
+        for key in ["journal", "number", "volume", "pages"]:
+            if key not in pub["bib"].keys():
+                pub["bib"][key] = ""
 
-            authors = pub["bib"]["author"]
-            authors = authors.replace(" and", ",", (authors.count(" and") - 1))
+        # Fill in what we can
+        pubs_by_year[year].append({"pub_year": year,
+                                   "title": pub["bib"]["title"],
+                                   "authors": authors,
+                                   "journal": pub["bib"]["journal"],
+                                   "volume": pub["bib"]["title"],
+                                   "number": pub["bib"]["number"],
+                                   "pages": pub["bib"]["pages"],
+                                   "url": pub["pub_url"]})
 
-            for key in ["journal", "number", "volume", "pages"]:
-                if key not in pub["bib"].keys():
-                    pub["bib"][key] = ""
-
-            # Fill in what we can, if we can!
-            pubs_by_year[year].append({"pub_year": year,
-                                       "title": pub["bib"]["title"],
-                                       "authors": authors,
-                                       "journal": pub["bib"]["journal"],
-                                       "volume": pub["bib"]["title"],
-                                       "number": pub["bib"]["number"],
-                                       "pages": pub["bib"]["pages"],
-                                       "url": pub["pub_url"]})
-
-# Now that we have everything sorted by year, start building the html strings
+# Now that we have everything separated by year, start building the html strings
 for year, pub_details_by_year in pubs_by_year.items():
     doc, tag, text = Doc().tagtext()
     with tag("ul"):
