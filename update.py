@@ -14,7 +14,7 @@ PEOPLE = ["James O'Shea",
           "Peter Beton",
           "James Sharp"]
 OUTPUT_DIR = "D:/Nano Group Page/all_pubs"
-MIN_YEAR = 2016
+MIN_YEAR = 1990
 
 # Setup proxy to avoid ignored requests
 pg = ProxyGenerator()
@@ -47,7 +47,7 @@ for pub in tqdm(pubs):
         authors = pub["bib"]["author"]
         authors = authors.replace(" and", ",", (authors.count(" and") - 1))
 
-        for key in ["journal", "number", "volume", "pages"]:
+        for key in ["journal", "number", "volume", "pages", "pub_url"]:
             if key not in pub["bib"].keys():
                 pub["bib"][key] = ""
 
