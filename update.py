@@ -47,9 +47,11 @@ for pub in tqdm(pubs):
         authors = pub["bib"]["author"]
         authors = authors.replace(" and", ",", (authors.count(" and") - 1))
 
-        for key in ["journal", "number", "volume", "pages", "pub_url"]:
+        for key in ["journal", "number", "volume", "pages"]:
             if key not in pub["bib"].keys():
                 pub["bib"][key] = ""
+            if "pub_url" not in pub.keys():
+                pub["pub_url"] = ""
 
         # Fill in what we can
         pubs_by_year[year].append({"pub_year": year,
