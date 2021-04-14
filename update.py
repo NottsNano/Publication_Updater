@@ -11,7 +11,8 @@ from yattag import Doc, indent
 PEOPLE = ["James O'Shea",
           "Alex Saywell",
           "Philip Moriarty",
-          "Peter Beton"]
+          "Peter Beton",
+          "James Sharp"]
 OUTPUT_DIR = "D:/Nano Group Page/all_pubs"
 MIN_YEAR = 2016
 
@@ -20,7 +21,7 @@ pg = ProxyGenerator()
 scholarly.use_proxy(pg.FreeProxies())
 
 # Preallocate
-pubs_by_year = defaultdict(list)
+pubs_by_year = defaultdict(list)    # Defaultdict creates entries if no already existing, so can append.
 pubs = []
 
 # Get all publications in an unordered list
